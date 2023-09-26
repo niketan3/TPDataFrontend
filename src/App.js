@@ -295,7 +295,7 @@ function App() {
   }
   else
   {
-    span1=<span className="tit">Select Division</span>
+    span1=<span className="tit">Select District</span>
    sel2=<select placeholder="Select District" onChange={nivda2}>
   <option value="All">All</option>
   <option value="Pune">Pune</option>
@@ -303,6 +303,7 @@ function App() {
   <option value="Konkan-2">Konkan-2</option>
   <option value="Nagpur">Nagpur</option>
   </select>
+  span2=<span className="tit">Select Division</span>
   sel1=<select placeholder="Select Division" onChange={nivda2}>
   <option value="All">All</option>
   <option value="Pune">Pune</option>
@@ -310,7 +311,7 @@ function App() {
   <option value="Konkan-2">Konkan-2</option>
   <option value="Nagpur">Nagpur</option>
 </select>
-  span2=<span className="tit">Select Division</span>
+  
 
   }
   let id1 = 0;
