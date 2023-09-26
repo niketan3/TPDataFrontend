@@ -1,5 +1,6 @@
 import logo from "./logo.svg";
 import "./App.css";
+
 import React, { useContext, useEffect, useState } from "react";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -38,7 +39,7 @@ function App() {
     });
     doc.save("data.pdf");
   };
- 
+
   const conponentPDF = useRef();
   const generatePDF = useReactToPrint({
     content: () => conponentPDF.current,
@@ -46,6 +47,10 @@ function App() {
     documentTitle: "Userdata",
   });
   const handlecheck = async (event, param1) => {
+    let tp = document.getElementById("check" + param1);
+    console.log(tp);
+    console.log(event.target.id);
+    console.log(param1);
     if (flag1 == 0) {
       if (event.target.checked) {
         ghya.push(param1);
@@ -59,6 +64,11 @@ function App() {
     } else {
       if (event.target.checked) {
         del.push(param1);
+        for (let i = 0; i < ghya.length; i++) {
+          if (ghya[i] == param1) {
+            ghya[i] = -1;
+          }
+        }
       }
     }
   };
@@ -66,31 +76,55 @@ function App() {
   const select = async (event) => {
     if (flag1 == 0) {
       for (let i = 0; i < ghya.length; i++) {
-        let tp = document.getElementById("check" + ghya[i]);
-        tp.checked = false;
+        if (ghya[i] != -1) {
+          let tp = document.getElementById("check" + ghya[i]);
+          tp.checked = false;
+        }
       }
       //Add Selected Names
       setflag1(1);
 
       let tp = [];
       let j = 0;
+      ghya.sort();
+      console.log(ghya);
+      // while(ghya[j]==-1)
+      // {
+      //   j++;
+      // }
       for (let i = 0; i < tpdata.length; i++) {
-        if (i != ghya[j]) {
-          tp[i] = tpdata[i];
-          tp[i].select = false;
-          tpdata[i].select = false;
-        } else {
-          tp[i] = tpdata[i];
-          j++;
+        tpdata[i].select = false;
+      }
+      for (let i = 0; i < ghya.length; i++) {
+        if (ghya[i] != -1) {
+          tpdata[ghya[i]].select = true;
         }
       }
+      // for (let i = 0; i < tpdata.length; i++) {
+      //   if(ghya[j]==-1)
+      //   {
+      //     j++;
+      //     i--;
+      //     continue;
+      //   }
+      //   if (i != ghya[j]) {
+      //     tp[i] = tpdata[i];
+      //     tp[i].select = false;
+      //     tpdata[i].select = false;
+      //   } else {
+      //     tp[i] = tpdata[i];
+      //     j++;
+      //   }
+      // }
       settoshow(tpdata);
     }
   };
   const DeleteNames = () => {
+    let temp = 0;
     let tp = [];
     let j = 0;
     del.sort();
+    j = 0;
     for (let i = 0; i < tpdata.length; i++) {
       if (i == del[j]) {
         tpdata[i].select = false;
@@ -100,13 +134,17 @@ function App() {
         tp[i] = tpdata[i];
       }
     }
-    
     console.log(tp);
     settoshow(tp);
   };
   if (flag1 == 0) {
     flag = (
-      <Button style={{ margin: "4px" }} variant="success" onClick={select}>
+      <Button
+        style={{ margin: "4px" }}
+        className="stickyButton"
+        variant="success"
+        onClick={select}
+      >
         Add Selected Names
       </Button>
     );
@@ -117,9 +155,8 @@ function App() {
       </Button>
     );
   }
-  
-  const onClickSubmit = async (event) => {
 
+  const onClickSubmit = async (event) => {
     // event.preventDefault();
     const url = "https://tpdata1.onrender.com/tp";
     const response = await fetch(url, {
@@ -144,14 +181,58 @@ function App() {
     }
     settoshow(tpdata);
     for (let i = 0; i < ghya.length; i++) {
-      let tp = document.getElementById("check" + ghya[i]);
-      console.log(tp);
-      tp.checked = true;
+      if (ghya[i] != -1) {
+        let tp = document.getElementById("check" + ghya[i]);
+        if (tp != null) {
+          console.log(tp);
+          tp.checked = true;
+        }
+      }
     }
   };
-  const Search=async(event)=>{
+  const nivda = (event) => {
+    console.log(event.target.value);
+    let tp = [];
+    if (event.target.value == "All") {
+      for (let i = 0; i < tpdata.length; i++) {
+        tp.push(tpdata[i]);
+      }
+      settoshow(tp);
+    } else {
+      for (let i = 0; i < tpdata.length; i++) {
+        tp[i] = tpdata[i];
+        tp[i].select = false;
+        if (tpdata[i]["District"] == event.target.value) {
+          tp[i].select=true;
+        }
+      }
+      settoshow(tp);
+    }
+  };
+  const nivda2 = (event) => {
+    console.log(event.target.value);
+    let tp = [];
+    if (event.target.value == "All") {
+      for (let i = 0; i < tpdata.length; i++) {
+        tp[i]=tpdata[i];
+        
+      }
+      settoshow(tp);
+    } else {
+      for (let i = 0; i < tpdata.length; i++) {
+        tp[i]=tpdata[i];
+        tp[i].select=false;
+        if (tpdata[i]["Division"] == event.target.value) {
+          tp[i].select=true;
+          
+        }
+      }
+      settoshow(tp);
+    }
+  };
+  const Search = async (event) => {
     // console.log(id)
-    event.preventDefault()
+    event.preventDefault();
     const url = "https://tpdata1.onrender.com/tpdata";
     const response = await fetch(url, {
       method: "POST",
@@ -161,14 +242,14 @@ function App() {
       body: JSON.stringify({ ID: id }),
     });
     const json = await response.json();
-    console.log(json)
+    console.log(json);
     for (let i = 0; i < json.length; i++) {
       json[i].select = true;
     }
     // console.log(json)
     settoshow(json);
     settpData(json);
-  }
+  };
   let printList = (
     <Button variant="success" onClick={generatePDF}>
       PrintList
@@ -183,9 +264,10 @@ function App() {
       </Button>
     );
   }
-   useEffect(() => {
-    onClickSubmit()
-  }, [])
+  useEffect(() => {
+    onClickSubmit();
+    setflag1(0);
+  }, []);
   let button = (
     <Button onClick={AddNames} variant="success" style={{ margin: "4px" }}>
       Add More Names
@@ -200,10 +282,40 @@ function App() {
       </Button>
     );
   }
+  let span1;
+  let span2;
+  let sel1;
+  let sel2;
+  if(flag1==1)
+  {
+    span1=null;
+    span2=null;
+    sel1=null;
+    sel2=null;
+  }
+  else
+  {
+    span1=<span className="tit">Select Division</span>
+   sel2=<select placeholder="Select District" onChange={nivda2}>
+  <option value="All">All</option>
+  <option value="Pune">Pune</option>
+  <option value="Nashik">Nashik</option>
+  <option value="Konkan-2">Konkan-2</option>
+  <option value="Nagpur">Nagpur</option>
+  </select>
+  sel1=<select placeholder="Select Division" onChange={nivda2}>
+  <option value="All">All</option>
+  <option value="Pune">Pune</option>
+  <option value="Nashik">Nashik</option>
+  <option value="Konkan-2">Konkan-2</option>
+  <option value="Nagpur">Nagpur</option>
+</select>
+  span2=<span className="tit">Select Division</span>
+
+  }
   let id1 = 0;
   return (
     <>
-
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <form style={{ display: "inline-block" }} onSubmit={Search}>
           <input
@@ -220,11 +332,21 @@ function App() {
             Search
           </Button>
         </form>
+        <div>
+          <div className="dist">
+           {span1}
+           {sel1}
+          </div>
+          <div className="dist">
+          {span2}
+          {sel2}
+          </div>
+        </div>
         {printList}
       </div>
       <div
         style={{
-          margin: "10px",
+          margin: "20px",
           alignItems: "center",
           justifyContent: "center",
           display: "flex",
